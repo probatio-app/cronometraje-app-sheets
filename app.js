@@ -1,6 +1,6 @@
 // Wait for DOM to load
 // Configuración de Supabase
-const SUPABASE_URL = 'https://sdjawcsjbtzuddwvdnt.supabase.co';
+const SUPABASE_URL = 'https://sdijawcsjbtzuddwvdnt.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkaWphd2NzamJ0enVkZHd2ZG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA1NDAxMjcsImV4cCI6MjA2NjExNjEyN30.rtZyHy2syXsm6ZwgNeJQvAbzhMeqW0VlQRjbEb28v2Q';
 let supabase;
 
@@ -14,6 +14,7 @@ async function loginWithGoogle() {
             provider: 'google',
             options: {
                 redirectTo: 'https://mcavallaro23.github.io/cronometraje-app-sheets/'
+                                   
             }
         });
         
