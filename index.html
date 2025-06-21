@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Timer</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js"
+    window.supabase = { createClient }
+</script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+   
+<!-- Botón de Logout -->
+<button id="logout-btn" class="logout-btn-top">LOGOUT</button>
+
+    <!-- Pantalla de Login -->
+<div id="login-screen" class="login-screen">
+    <div class="login-container">
+        <h1>CRONOMETRAJE APP</h1>
+        <p>Ingresá con tu cuenta de Google para empezar</p>
+        <button id="login-btn" class="login-btn">LOGIN CON GOOGLE</button>
+    </div>
+</div>
+
+    <div id="page-chrono" class="page active-page">
+        <div class="container">
+            <div class="form-group">
+                <label for="club-select">Club</label>
+                <select id="club-select">
+                    <option value="">-- Choose --</option>
+                </select>
+
+                <label for="division-select">Division</label>
+                <select id="division-select" disabled>
+                    <option value="">-- Choose --</option>
+                </select>
+
+                <label for="athlete-select">Athlete</label>
+                <select id="athlete-select" disabled>
+                    <option value="">-- Choose --</option>
+                </select>
+
+                <label for="test-select">Test</label>
+                <select id="test-select">
+                    <option value="">-- Choose --</option>                    
+                </select>
+
+                <div id="test-config" class="test-config">
+                    <h3>Test Parameters</h3>
+                    <div class="config-grid">
+                        <div class="config-item">
+                            <div class="config-label">TIMES</div>
+                            <div class="config-value" id="config-times">-</div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-label">REPETITIONS</div>
+                            <div class="config-value" id="config-repetitions">-</div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-label">RECOVERY</div>
+                            <div class="config-value" id="config-recovery">- SECONDS</div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-label">DEAD TIME</div>
+                            <div class="config-value" id="config-dead-time">- SECONDS</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button id="start-btn" class="start-btn" disabled>START</button>
+
+            <div class="button-group">
+                <button id="reset-btn" class="reset-btn">RESET</button>
+                <button id="save-btn" class="save-btn">FINISH TEST</button>
+            </div>
+            
+            <div class="time-counter" id="time-counter">-/-</div>           
+            <h1 id="chrono" class="chrono">00.000</h1>
+
+            <div class="times-grid">
+                <div class="rep-column">
+                    <h3>REP</h3>
+                    <div id="rep-counter" class="rep-counter">(1/1)</div>
+                </div>
+                <div class="times-column">
+                    <h3>SPLIT</h3>
+                    <div id="split-1" class="time-value">--</div>
+                    <div id="split-2" class="time-value">--</div>
+                    <div id="split-3" class="time-value">--</div>
+                    <div id="split-4" class="time-value">--</div>
+                    <div id="split-5" class="time-value">--</div>
+                    <div id="split-6" class="time-value">--</div>
+                </div>
+                <div class="times-column">
+                    <h3>LAP</h3>
+                    <div id="lap-1" class="time-value">--</div>
+                    <div id="lap-2" class="time-value">--</div>
+                    <div id="lap-3" class="time-value">--</div>
+                    <div id="lap-4" class="time-value">--</div>
+                    <div id="lap-5" class="time-value">--</div>
+                    <div id="lap-6" class="time-value">--</div>
+                </div>
+                <div class="photocells-column">
+                    <h3>FOTOCÉLULAS</h3>
+                    <button id="photocell-1" class="photocell-btn">R1</button>
+                    <button id="photocell-2" class="photocell-btn">R2</button>
+                    <button id="photocell-3" class="photocell-btn">R3</button>
+                    <div class="photocell-info">Simulan tramas Bluetooth</div>
+                </div>
+            </div>
+
+            <div class="tested-section">
+                <h4>Last Tested</h4>
+                <ul class="tested-list">
+                    <li id="tested-1">--</li>
+                    <li id="tested-2">--</li>
+                    <li id="tested-3">--</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Página de atletas -->
+    <div id="page-athletes" class="page">
+        <div class="container">
+            <h1 style="text-align: center; color: #0ff; margin-bottom: 30px;">ATHLETES MANAGEMENT</h1>
+            
+            <!-- Navegación de estructura -->
+            <div class="athletes-navigation">
+                <div class="nav-section">
+                    <label for="athletes-club-select">Club</label>
+                    <select id="athletes-club-select">
+                        <option value="">-- Select Club --</option>
+                    </select>
+                    <button id="delete-club-btn" class="delete-section-btn" disabled>DELETE CLUB</button>
+                </div>
+                
+                <div class="nav-section">
+                    <label for="athletes-division-select">Division</label>
+                    <select id="athletes-division-select" disabled>
+                        <option value="">-- Select Division --</option>
+                    </select>
+                    <button id="delete-division-btn" class="delete-section-btn" disabled>DELETE DIVISION</button>
+                </div>
+            </div>
+
+            <!-- Formulario para agregar club -->
+            <div class="management-section">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Add New Club</h3>
+                <div class="add-form">
+                    <div class="form-row-inline">
+                        <input type="text" id="new-club-name" placeholder="Club name" maxlength="30">
+                        <button id="add-club-btn" class="add-btn">ADD CLUB</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario para agregar división -->
+            <div class="management-section">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Add New Division</h3>
+                <div class="add-form">
+                    <div class="form-row-inline">
+                        <input type="text" id="new-division-name" placeholder="Division name" maxlength="30">
+                        <button id="add-division-btn" class="add-btn" disabled>ADD DIVISION</button>
+                    </div>
+                    <div class="form-hint">Select a club first to add divisions</div>
+                </div>
+            </div>
+
+            <!-- Formulario para agregar atleta -->
+            <div class="management-section">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Add New Athlete</h3>
+                <div class="add-form">
+                    <div class="form-row-inline">
+                        <input type="text" id="new-athlete-name" placeholder="Athlete name" maxlength="30">
+                        <button id="add-athlete-btn" class="add-btn" disabled>ADD ATHLETE</button>
+                    </div>
+                    <div class="form-hint">Select club and division first to add athletes</div>
+                </div>
+            </div>
+
+            <!-- Lista de atletas actuales -->
+            <div id="athletes-list-section" class="athletes-list-section" style="display: none;">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Athletes in <span id="current-selection">--</span></h3>
+                <div id="athletes-list" class="athletes-list">
+                    <!-- Atletas se muestran aquí dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Página de tests -->
+    <div id="page-tests" class="page">
+        <div class="container">
+            <h1 style="text-align: center; color: #0ff; margin-bottom: 30px;">TESTS MANAGEMENT</h1>
+            
+            <!-- Formulario para agregar test -->
+            <div class="test-form-section">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Add New Test</h3>
+                <div class="test-form">
+                    <div class="form-row">
+                        <label for="new-test-name">Test Name</label>
+                        <input type="text" id="new-test-name" placeholder="Enter test name" maxlength="20">
+                    </div>
+                    
+                    <div class="form-row">
+                        <label for="new-test-times">Times (1-6)</label>
+                        <input type="number" id="new-test-times" min="1" max="6" placeholder="1">
+                    </div>
+                    
+                    <div class="form-row">
+                        <label for="new-test-repetitions">Repetitions</label>
+                        <input type="number" id="new-test-repetitions" min="1" max="10" placeholder="1">
+                    </div>
+                    
+                    <div class="form-row">
+                        <label for="new-test-recovery">Recovery (seconds)</label>
+                        <input type="number" id="new-test-recovery" min="0" max="300" placeholder="0">
+                    </div>
+                    
+                    <div class="form-row">
+                        <label for="new-test-dead-time">Dead Time (seconds)</label>
+                        <select id="new-test-dead-time">
+                            <option value="1">1 second</option>
+                            <option value="2" selected>2 seconds</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="new-test-distances">Distances (meters) - Optional</label>
+                        <input type="text" id="new-test-distances" placeholder="e.g. 35 or 10-20-30">
+                    </div>
+                    
+                    <div class="form-row">
+                        <label for="new-test-description">Description - Optional</label>
+                        <textarea id="new-test-description" placeholder="Enter test description, instructions, or notes..." maxlength="500" rows="3"></textarea>
+                    </div>
+                    
+                    <button id="add-test-btn" class="add-test-btn">ADD TEST</button>
+                </div>
+            </div>
+
+            <!-- Lista de tests existentes -->
+            <div class="tests-list-section">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Existing Tests</h3>
+                <div class="tests-list">
+                    <div class="test-item">
+                        <div class="test-info">
+                          
+                        </div>
+                      
+                    </div>                    
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Página de photocells -->
+    <div id="page-photocells" class="page">
+        <div class="container">
+            <h1 style="text-align: center; color: #fff; margin-top: 50px;">PHOTOCELLS</h1>
+        </div>
+    </div>
+    <!-- Página de results -->
+    <div id="page-results" class="page">
+        <div class="container">
+            <h1 style="text-align: center; color: #0ff; margin-bottom: 30px;">TEST RESULTS</h1>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button id="share-all-btn" class="share-all-btn">SHARE ALL</button>
+            </div>
+            <div id="results-list" class="results-list">
+                <!-- Los resultados se van a mostrar acá dinámicamente -->
+            </div>
+        </div>
+    </div>
+    <div id="reset-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title reset">Confirm RESET</h3>
+            <p id="reset-text">Are you sure you want to reset TEST for CLUB - DIVISION?</p>
+            <p style="color: #ff9999; font-size: 14px; margin-bottom: 30px;">
+                This will delete all results for the current test.
+            </p>
+            <div class="modal-buttons">
+                <button id="cancel-reset" class="modal-btn cancel">CANCEL</button>
+                <button id="confirm-reset" class="modal-btn confirm">YES, RESET</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="save-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title save">Finish Test</h3>
+            <p id="save-text">There are still 0 athletes to be evaluated.</p>
+            <p style="color: #ffcc99; font-size: 14px; margin-bottom: 30px;">
+                Do you want to mark them as DNF (Did Not Finish) and finish the test?
+            </p>
+            <div class="modal-buttons">
+                <button id="cancel-save" class="modal-btn cancel">CANCEL</button>
+                <button id="confirm-save" class="modal-btn finish">YES, FINISH</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="results-modal" class="modal">
+        <div class="modal-content wide">
+            <div class="modal-header">
+                <h3 class="modal-title results" id="results-title">Results: TEST - CLUB - DIVISION</h3>
+                <button id="close-results-header" class="close-btn">×</button>
+            </div>
+            
+            <div class="results-table" id="results-table">
+            </div>
+            
+            <div class="test-footer" id="test-footer">
+            </div>
+            
+            <div style="text-align: center;">
+                <button id="close-results" class="modal-btn close">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar" id="navbar">
+    <!-- Botones se generan dinámicamente -->
+</nav>
+
+    <footer class="version">v6</footer>
+
+    <script src="app.js" defer></script>
+</body>
+</html>
