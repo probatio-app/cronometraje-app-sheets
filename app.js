@@ -1816,6 +1816,21 @@ if (shareAllBtn) {
     shareAllBtn.disabled = savedResults.length === 0;
     shareAllBtn.onclick = exportAllResultsToExcel;
 }
+
+// NUEVO: Event listener para TEST GOOGLE SHEETS
+const sheetsTestBtn = document.getElementById('sheets-test-btn');
+if (sheetsTestBtn) {
+    sheetsTestBtn.disabled = savedResults.length === 0;
+    sheetsTestBtn.onclick = () => {
+        console.log('Testing Google Sheets...');
+        if (savedResults.length > 0) {
+            // Usar el primer resultado como prueba
+            authorizeAndCreateSheet(savedResults[0]);
+        } else {
+            alert('No hay resultados para exportar');
+        }
+    };
+}
 };
 
 const showSavedResult = (result) => {
