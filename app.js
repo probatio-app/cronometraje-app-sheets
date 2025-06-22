@@ -3458,5 +3458,27 @@ const addDivision = async (club, divisionName) => {
     updateSaveButton();
     updateTestedDisplay();
 
+    // Initialize
+    updateNavbar();
+    setupTestsPage();
+    setupAthletesPage();
+    updateStartButton();
+    updateSaveButton();
+    updateTestedDisplay();
+
+    // AGREGAR ESTO:
+    // Event listener para el botón de Google Sheets
+    document.addEventListener('click', (e) => {
+        if (e.target && e.target.id === 'sheets-test-btn') {
+            console.log('Testing Google Sheets...');
+            if (savedResults.length > 0) {
+                authorizeAndCreateSheet(savedResults[0]);
+            } else {
+                alert('No hay resultados para exportar');
+            }
+        }
+    });
+
+
 }); // End of DOMContentLoaded
 
