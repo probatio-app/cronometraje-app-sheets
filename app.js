@@ -16,6 +16,35 @@ const API_KEY = 'AIzaSyDNoMo2XoJoeKdR7NDgdYPkKkXY_2ktWc8'; // Necesitás crear u
 const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
+
+// Funciones de inicialización de Google
+function gapiLoaded() {
+    gapi.load('client', initializeGapiClient);
+}
+
+async function initializeGapiClient() {
+    try {
+        await gapi.client.init({
+            apiKey: API_KEY,
+            discoveryDocs: [DISCOVERY_DOC],
+        });
+        gapiInited = true;
+        console.log('Google API Client inicializado');
+    } catch (error) {
+        console.error('Error inicializando GAPI:', error);
+    }
+}
+
+function gisLoaded() {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: '', // Se define más tarde
+    });
+    gisInited = true;
+    console.log('Google Identity Services inicializado');
+}
+
 // Variables de autenticación
 let currentUser = null;
 
