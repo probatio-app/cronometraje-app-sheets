@@ -1690,6 +1690,7 @@ const updateResultsList = () => {
             <div class="result-buttons">
                 <button class="view-result-btn" data-id="${result.id}">VIEW</button>
                 <button class="export-result-btn" data-id="${result.id}">SHARE</button>
+                <button class="delete-result-btn" data-id="${result.id}">DELETE</button>
             </div>
         `;
         
