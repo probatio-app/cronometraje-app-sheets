@@ -357,38 +357,7 @@ async function deleteAthleteFromSupabase(clubName, divisionName, athleteName) {
 // FUNCIONES PARA RESULTS BACKUP EN SUPABASE
 // ========================================
 
-// Guardar backup de resultados
-async function saveResultsBackupToSupabase() {
-    try {
-        // Primero borrar backup anterior del usuario
-        await supabase
-            .from('results_backup')
-            .delete()
-            .eq('user_id', currentUser.id);
-            
-        // Guardar nuevo backup
-        const { data, error } = await supabase
-            .from('results_backup')
-            .insert([
-                { 
-                    user_id: currentUser.id,
-                    saved_results: savedResults
-                }
-            ])
-            .select();
-            
-        if (error) {
-            console.error('Error guardando backup:', error);
-            return false;
-        }
-        
-        console.log('Backup guardado en Supabase');
-        return true;
-    } catch (error) {
-        console.error('Error guardando backup:', error);
-        return false;
-    }
-}
+
 
 // Recuperar backup de resultados
 async function loadResultsBackupFromSupabase() {
@@ -597,6 +566,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     let testFinished = false;
 
     let savedResults = []; // Array para guardar todos los resultados completados
+
+    // Guardar backup de resultados
+async function saveResultsBackupToSupabase() {
+    try {
+        // Primero borrar backup anterior del usuario
+        await supabase
+            .from('results_backup')
+            .delete()
+            .eq('user_id', currentUser.id);
+            
+        // Guardar nuevo backup
+        const { data, error } = await supabase
+            .from('results_backup')
+            .insert([
+                { 
+                    user_id: currentUser.id,
+                    saved_results: savedResults
+                }
+            ])
+            .select();
+            
+        if (error) {
+            console.error('Error guardando backup:', error);
+            return false;
+        }
+        
+        console.log('Backup guardado en Supabase');
+        return true;
+    } catch (error) {
+        console.error('Error guardando backup:', error);
+        return false;
+    }
+}
+
+
 
 const timeToSeconds = (timeStr) => {
     if (typeof timeStr === 'number') return timeStr;
