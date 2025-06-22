@@ -477,7 +477,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     window.backupChecked = true;
                     loadResultsBackupFromSupabase().then(backup => {
                         if (backup && backup.saved_results && backup.saved_results.length > 0) {
-                            if (confirm('Se encontraron ' + backup.saved_results.length + ' resultados de la sesión anterior. ¿Querés recuperarlos?')) {
+                            if (confirm(backup.saved_results.length + ' saved results found from previous session. Do you want to recover them?')) {
                                 savedResults = backup.saved_results;
                                 updateResultsList();
                                 console.log('Resultados recuperados:', savedResults.length);
