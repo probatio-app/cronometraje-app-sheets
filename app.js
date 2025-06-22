@@ -1344,6 +1344,8 @@ startBtn.addEventListener('click', () => {
                         athletes: testedAthletes
                     };
                     savedResults.push(resultData);
+                    // Guardar backup automáticamente
+                    saveResultsBackupToSupabase();
                     console.log('Resultado guardado:', savedResults);
                     updateResultsList();
                    setTimeout(() => showTestCompleted(), 500);
@@ -3016,6 +3018,8 @@ const addDivision = async (club, divisionName) => {
             athletes: newTestedList
         };
         savedResults.push(resultData);
+        // Guardar backup automáticamente
+        saveResultsBackupToSupabase();
         updateResultsList();
     });
 
