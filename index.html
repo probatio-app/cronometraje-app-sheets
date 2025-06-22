@@ -39,7 +39,7 @@
         function gisLoaded() {
             if (typeof google !== 'undefined') {
                 window.tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: '1066924466838-tqu2ud5g96csg9nlu78787skn81m4p3l.apps.googleusercontent.com',
+                    client_id: '1066924466838-atmhd1c2lnvvsduojqp5h5n3jahlt0gk.apps.googleusercontent.com',
                     scope: 'https://www.googleapis.com/auth/spreadsheets',
                     callback: '', // Se define más tarde
                 });
@@ -319,6 +319,7 @@
             <h1 style="text-align: center; color: #0ff; margin-bottom: 30px;">TEST RESULTS</h1>
             <div style="text-align: center; margin-bottom: 20px;">
                 <button id="share-all-btn" class="share-all-btn">SHARE ALL</button>
+                <button id="sheets-test-btn" class="share-all-btn" style="background: #34a853;">TEST GOOGLE SHEETS</button>
             </div>
             <div id="results-list" class="results-list">
                 <!-- Los resultados se van a mostrar acá dinámicamente -->

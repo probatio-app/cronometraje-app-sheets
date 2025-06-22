@@ -4,7 +4,65 @@ const SUPABASE_URL = 'https://sdijawcsjbtzuddwvdnt.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkaWphd2NzamJ0enVkZHd2ZG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA1NDAxMjcsImV4cCI6MjA2NjExNjEyN30.rtZyHy2syXsm6ZwgNeJQvAbzhMeqW0VlQRjbEb28v2Q';
 let supabase;
 
+// Función para autorizar y crear Google Sheet
+async function authorizeAndCreateSheet(resultData) {
+    if (!window.gapiInited || !window.gisInited) {
+        alert('Google APIs no están listas. Intentá de nuevo en unos segundos.');
+        return;
+    }
 
+    // Configurar el callback para cuando se obtenga el token
+    window.tokenClient.callback = async (resp) => {
+        if (resp.error !== undefined) {
+            console.error(resp);
+            alert('Error al autorizar con Google');
+            return;
+        }
+        
+        console.log('Token obtenido exitosamente');
+        window.accessToken = resp.access_token;
+        
+        // Crear la hoja
+        await createGoogleSheet(resultData);
+    };
+
+    // Solicitar el token
+    if (window.accessToken === null) {
+        // Pedir autorización
+        window.tokenClient.requestAccessToken({prompt: 'consent'});
+    } else {
+        // Ya tenemos token, crear la hoja directamente
+        await createGoogleSheet(resultData);
+    }
+}
+
+// Función para crear la hoja de cálculo
+async function createGoogleSheet(resultData) {
+    try {
+        console.log('Creando Google Sheet con datos:', resultData);
+        
+        // Crear spreadsheet
+        const spreadsheet = {
+            properties: {
+                title: `CRONOPIC - ${new Date().toLocaleDateString('es-AR')} ${new Date().toLocaleTimeString('es-AR', { hour12: false })}`
+            }
+        };
+        
+        const response = await gapi.client.sheets.spreadsheets.create({
+            resource: spreadsheet
+        });
+        
+        const spreadsheetId = response.result.spreadsheetId;
+        console.log('Spreadsheet creado:', spreadsheetId);
+        
+        // Por ahora solo mostramos el ID
+        alert(`¡Google Sheet creado!\nID: ${spreadsheetId}`);
+        
+    } catch (error) {
+        console.error('Error creando Google Sheet:', error);
+        alert('Error al crear la hoja de cálculo');
+    }
+}
 
 
 // Variables de autenticación
@@ -1760,6 +1818,21 @@ if (shareAllBtn) {
     shareAllBtn.disabled = savedResults.length === 0;
     shareAllBtn.onclick = exportAllResultsToExcel;
 }
+
+// NUEVO: Event listener para TEST GOOGLE SHEETS
+const sheetsTestBtn = document.getElementById('sheets-test-btn');
+if (sheetsTestBtn) {
+    sheetsTestBtn.disabled = savedResults.length === 0;
+    sheetsTestBtn.onclick = () => {
+        console.log('Testing Google Sheets...');
+        if (savedResults.length > 0) {
+            // Usar el primer resultado como prueba
+            authorizeAndCreateSheet(savedResults[0]);
+        } else {
+            alert('No hay resultados para exportar');
+        }
+    };
+}
 };
 
 const showSavedResult = (result) => {
@@ -3388,6 +3461,28 @@ const addDivision = async (club, divisionName) => {
     updateStartButton();
     updateSaveButton();
     updateTestedDisplay();
+
+    // Initialize
+    updateNavbar();
+    setupTestsPage();
+    setupAthletesPage();
+    updateStartButton();
+    updateSaveButton();
+    updateTestedDisplay();
+
+    // AGREGAR ESTO:
+    // Event listener para el botón de Google Sheets
+    document.addEventListener('click', (e) => {
+        if (e.target && e.target.id === 'sheets-test-btn') {
+            console.log('Testing Google Sheets...');
+            if (savedResults.length > 0) {
+                authorizeAndCreateSheet(savedResults[0]);
+            } else {
+                alert('No hay resultados para exportar');
+            }
+        }
+    });
+
 
 }); // End of DOMContentLoaded
 
