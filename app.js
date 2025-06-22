@@ -19,11 +19,16 @@ const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
 // Funciones de inicialización de Google
 function gapiLoaded() {
-    gapi.load('client', initializeGapiClient);
+    if (typeof gapi !== 'undefined') {
+        gapi.load('client', initializeGapiClient);
+    } else {
+        console.log('Esperando a que gapi esté disponible...');
+        setTimeout(gapiLoaded, 100);
+    }
 }
 
 async function initializeGapiClient() {
-    try {
+     try {
         await gapi.client.init({
             apiKey: API_KEY,
             discoveryDocs: [DISCOVERY_DOC],
@@ -36,13 +41,18 @@ async function initializeGapiClient() {
 }
 
 function gisLoaded() {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: '', // Se define más tarde
-    });
-    gisInited = true;
-    console.log('Google Identity Services inicializado');
+    if (typeof google !== 'undefined') {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID,
+            scope: SCOPES,
+            callback: '', // Se define más tarde
+        });
+        gisInited = true;
+        console.log('Google Identity Services inicializado');
+    } else {
+        console.log('Esperando a que google esté disponible...');
+        setTimeout(gisLoaded, 100);
+    }
 }
 
 // Hacer las funciones globales para que los scripts las encuentren
