@@ -472,9 +472,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentUser = session.user;
             hideLoginScreen();           
             // Verificar si hay backup de resultados
+            // Verificar si hay backup de resultados
             loadResultsBackupFromSupabase().then(backup => {
                 if (backup && backup.saved_results && backup.saved_results.length > 0) {
-                    if (confirm(`Se encontraron ${backup.saved_results.length} resultados de la sesión anterior. ¿Querés recuperarlos?`)) {
+                    if (confirm('Se encontraron ' + backup.saved_results.length + ' resultados de la sesión anterior. ¿Querés recuperarlos?')) {
                         savedResults = backup.saved_results;
                         updateResultsList();
                         console.log('Resultados recuperados:', savedResults.length);
