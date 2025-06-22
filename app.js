@@ -359,31 +359,7 @@ async function deleteAthleteFromSupabase(clubName, divisionName, athleteName) {
 
 
 
-// Recuperar backup de resultados
-async function loadResultsBackupFromSupabase() {
-    try {
-        const { data, error } = await supabase
-            .from('results_backup')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .order('created_at', { ascending: false })
-            .limit(1);
-            
-        if (error) {
-            console.error('Error cargando backup:', error);
-            return null;
-        }
-        
-        if (data && data.length > 0) {
-            return data[0];
-        }
-        
-        return null;
-    } catch (error) {
-        console.error('Error cargando backup:', error);
-        return null;
-    }
-}
+
 
 // ========================================
 // FUNCIONES PARA TESTS EN SUPABASE
@@ -495,7 +471,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (session) {
             currentUser = session.user;
             hideLoginScreen();           
-            
+            // Verificar si hay backup de resultados
+            loadResultsBackupFromSupabase().then(backup => {
+                if (backup && backup.saved_results && backup.saved_results.length > 0) {
+                    if (confirm(`Se encontraron ${backup.saved_results.length} resultados de la sesión anterior. ¿Querés recuperarlos?`)) {
+                        savedResults = backup.saved_results;
+                        updateResultsList();
+                        console.log('Resultados recuperados:', savedResults.length);
+                    }
+                }
+            });
             // Cargar clubs del usuario desde Supabase
 
         // SIN AWAIT - usando .then()
@@ -600,7 +585,31 @@ async function saveResultsBackupToSupabase() {
     }
 }
 
-
+// Recuperar backup de resultados
+async function loadResultsBackupFromSupabase() {
+    try {
+        const { data, error } = await supabase
+            .from('results_backup')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .order('created_at', { ascending: false })
+            .limit(1);
+            
+        if (error) {
+            console.error('Error cargando backup:', error);
+            return null;
+        }
+        
+        if (data && data.length > 0) {
+            return data[0];
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('Error cargando backup:', error);
+        return null;
+    }
+}
 
 const timeToSeconds = (timeStr) => {
     if (typeof timeStr === 'number') return timeStr;
