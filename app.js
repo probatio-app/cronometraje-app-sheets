@@ -4,6 +4,18 @@ const SUPABASE_URL = 'https://sdijawcsjbtzuddwvdnt.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNkaWphd2NzamJ0enVkZHd2ZG50Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA1NDAxMjcsImV4cCI6MjA2NjExNjEyN30.rtZyHy2syXsm6ZwgNeJQvAbzhMeqW0VlQRjbEb28v2Q';
 let supabase;
 
+// Variables para Google Sheets
+let gapiInited = false;
+let gisInited = false;
+let tokenClient;
+let accessToken = null;
+
+// Configuración Google Sheets
+const CLIENT_ID = '1066924466838-tqu2ud5g96csg9nlu78787skn81m4p3l.apps.googleusercontent.com'; // Tu client ID actual
+const API_KEY = 'AIzaSyDNoMo2XoJoeKdR7NDgdYPkKkXY_2ktWc8'; // Necesitás crear una API Key
+const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
+const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+
 // Variables de autenticación
 let currentUser = null;
 
@@ -13,12 +25,7 @@ async function loginWithGoogle() {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: 'https://mcavallaro23.github.io/cronometraje-app-sheets/',                
-                queryParams: {
-                    access_type: 'offline',
-                    prompt: 'consent', 
-                    scope: 'https://www.googleapis.com/auth/spreadsheets'
-                }                
+                redirectTo: 'https://mcavallaro23.github.io/cronometraje-app-sheets/'
             }
         });
         
