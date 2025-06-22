@@ -5,34 +5,6 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 let supabase;
 
 
-// Función para crear la hoja de cálculo
-async function createGoogleSheet(resultData) {
-    try {
-        console.log('Creando Google Sheet con datos:', resultData);
-        
-        // Crear spreadsheet
-        const spreadsheet = {
-            properties: {
-                title: `CRONOPIC - ${new Date().toLocaleDateString('es-AR')} ${new Date().toLocaleTimeString('es-AR', { hour12: false })}`
-            }
-        };
-        
-        const response = await gapi.client.sheets.spreadsheets.create({
-            resource: spreadsheet
-        });
-        
-        const spreadsheetId = response.result.spreadsheetId;
-        console.log('Spreadsheet creado:', spreadsheetId);
-        
-        // Por ahora solo mostramos el ID
-        alert(`¡Google Sheet creado!\nID: ${spreadsheetId}`);
-        
-    } catch (error) {
-        console.error('Error creando Google Sheet:', error);
-        alert('Error al crear la hoja de cálculo');
-    }
-}
-
 
 // Variables de autenticación
 let currentUser = null;
@@ -440,8 +412,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (session) {
             currentUser = session.user;
             hideLoginScreen();           
-            // Verificar si hay backup de resultados            
-            loadResultsBackupFromSupabase().then(backup => {
+            // Verificar si hay backup de resultados  
                 if (!window.backupChecked) {
                     window.backupChecked = true;
                     loadResultsBackupFromSupabase().then(backup => {
@@ -454,7 +425,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     });
                 }
-            });
+            
             // Cargar clubs del usuario desde Supabase
 
         // SIN AWAIT - usando .then()
@@ -631,8 +602,7 @@ const timeToSeconds = (timeStr) => {
     const athleteSelect = document.getElementById('athlete-select');
     const startBtn = document.getElementById('start-btn');
     const resetBtn = document.getElementById('reset-btn');
-    const saveBtn = document.getElementById('save-btn');
-    //const currentAthleteEl = document.getElementById('current-athlete');
+    const saveBtn = document.getElementById('save-btn');    
     const chronoEl = document.getElementById('chrono');
     const testConfigEl = document.getElementById('test-config');
 
@@ -812,10 +782,7 @@ const timeToSeconds = (timeStr) => {
             showRecovery(remaining);
         }
     };
-
-    /*const showRepetition = () => {
-        currentAthleteEl.textContent = `${currentAthlete} (${currentRepetition}/${totalRepetitions})`;
-    };*/
+    
 
     const updateDisplay = () => {
         let cumulativeMs = 0;
@@ -1251,18 +1218,7 @@ startBtn.addEventListener('click', () => {
            // Para RAST: NO resetear impulses ni laps ni limpiar pantalla
            updateCounters();
         }
-       /*
-       // CORREGIR: Display del atleta según tipo de test
-       if (config.repetitions === 1 && config.recovery > 0) {
-           // Para tests tipo RAST: mostrar tiempo actual / total tiempos
-           currentAthleteEl.textContent = `${currentAthlete} (${impulses + 1}/${config.times})`;
-       } else if (config.times > 1 && config.repetitions > 1) {
-           // Para tests combinados: mostrar repetición actual / total repeticiones
-           currentAthleteEl.textContent = `${currentAthlete} (${currentRepetition}/${config.repetitions})`;
-       } else {
-           // Para otros tests: usar lógica original
-           currentAthleteEl.textContent = `${currentAthlete} (${impulses}/${config.times})`;
-       }*/
+       
        
        startBtn.textContent = "TIME";
        startBtn.classList.remove('enabled');
@@ -3463,16 +3419,6 @@ const addDivision = async (club, divisionName) => {
     updateStartButton();
     updateSaveButton();
     updateTestedDisplay();
-
-    // Initialize
-    updateNavbar();
-    setupTestsPage();
-    setupAthletesPage();
-    updateStartButton();
-    updateSaveButton();
-    updateTestedDisplay();
-   
-
-
+  
 }); // End of DOMContentLoaded
 
