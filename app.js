@@ -45,6 +45,10 @@ function gisLoaded() {
     console.log('Google Identity Services inicializado');
 }
 
+// Hacer las funciones globales para que los scripts las encuentren
+window.gapiLoaded = gapiLoaded;
+window.gisLoaded = gisLoaded;
+
 // Variables de autenticación
 let currentUser = null;
 
