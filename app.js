@@ -593,7 +593,7 @@ async function loadResultsBackupFromSupabase() {
             .from('results_backup')
             .select('*')
             .eq('user_id', currentUser.id)
-            .order('created_at', { ascending: false })
+            .order('updated_at', { ascending: false })
             .limit(1);
             
         if (error) {
