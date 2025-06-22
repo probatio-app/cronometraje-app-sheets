@@ -330,7 +330,20 @@
 </nav>
 
     <footer class="version">v6</footer>
-
+    <!-- Google API Client Library -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+        // Cargar la librería de Google API
+        function handleClientLoad() {
+            gapi.load('client:auth2', initClient);
+        }
+        
+        function initClient() {
+            // Inicialización vacía por ahora
+            console.log('Google API loaded');
+        }
+    </script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="handleClientLoad()"></script>
     <script src="app.js" defer></script>
 </body>
 </html>

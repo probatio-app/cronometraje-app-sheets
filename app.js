@@ -14,6 +14,7 @@ async function loginWithGoogle() {
             provider: 'google',
             options: {
                 redirectTo: 'https://mcavallaro23.github.io/cronometraje-app-sheets/'
+                scopes: 'https://www.googleapis.com/auth/spreadsheets'
                                    
             }
         });
