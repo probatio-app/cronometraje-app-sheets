@@ -13,10 +13,8 @@ async function loginWithGoogle() {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: 'https://mcavallaro23.github.io/cronometraje-app-sheets/',                
-                  queryParams: {
-                    prompt: 'select_account'
-                }                 
+                redirectTo: 'https://mcavallaro23.github.io/cronometraje-app-sheets/'                
+                                
             }
         });
         
