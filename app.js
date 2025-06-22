@@ -55,9 +55,7 @@ function gisLoaded() {
     }
 }
 
-// Hacer las funciones globales para que los scripts las encuentren
-window.gapiLoaded = gapiLoaded;
-window.gisLoaded = gisLoaded;
+
 
 // Variables de autenticación
 let currentUser = null;
@@ -3438,3 +3436,7 @@ const addDivision = async (club, divisionName) => {
     updateTestedDisplay();
 
 }); // End of DOMContentLoaded
+
+// Hacer las funciones globales para que los scripts las encuentren
+window.gapiLoaded = gapiLoaded;
+window.gisLoaded = gisLoaded;
