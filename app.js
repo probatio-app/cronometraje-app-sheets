@@ -2642,6 +2642,19 @@ const addDivision = async (club, divisionName) => {
     // Función para importar desde Google Sheets
     async function importFromGoogleSheets(sheetId) {
         try {
+            // Extraer ID si pegaron URL completa
+            let spreadsheetId = sheetId;
+            if (sheetId.includes('docs.google.com/spreadsheets')) {
+                const match = sheetId.match(/\/d\/([a-zA-Z0-9-_]+)/);
+                if (match && match[1]) {
+                    spreadsheetId = match[1];
+                    console.log('ID extraído:', spreadsheetId);
+                } else {
+                    alert('No se pudo extraer el ID de la URL');
+                    return;
+                }
+            }
+            
             // Verificar que gapi esté listo
             if (!window.gapiInited) {
                 alert('Google API no está lista. Intentá de nuevo en unos segundos.');
@@ -2650,7 +2663,7 @@ const addDivision = async (club, divisionName) => {
             
             // Intentar obtener el sheet
             const response = await gapi.client.sheets.spreadsheets.get({
-                spreadsheetId: sheetId
+                spreadsheetId: spreadsheetId
             });
             
             console.log('Sheet info:', response.result);
