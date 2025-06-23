@@ -2854,6 +2854,25 @@ const addDivision = async (club, divisionName) => {
         updateAddAthleteButtonState();
         updateAddDivisionButtonState();
         updateDeleteButtonsState();
+    // Import from Google Sheets - listener directo
+    const importBtn = document.getElementById('import-sheet-btn');
+    if (importBtn) {
+        importBtn.replaceWith(importBtn.cloneNode(true));
+        const newImportBtn = document.getElementById('import-sheet-btn');
+        
+        newImportBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const sheetId = document.getElementById('sheet-id').value.trim();
+            
+            if (!sheetId) {
+                alert('Por favor, pegá el ID del Google Sheet');
+                return;
+            }
+            
+            console.log('Import clicked! Sheet ID:', sheetId);
+            alert('Sheet ID: ' + sheetId);
+        });
+    }
     };
 
     // === BOTONES RESET Y SAVE ===
