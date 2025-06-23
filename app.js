@@ -2809,11 +2809,28 @@ const addDivision = async (club, divisionName) => {
             previewModal.classList.add('show');
 
             // Setup botón confirmar
-            document.getElementById('confirm-import-btn').onclick = () => {
+            document.getElementById('confirm-import-btn').onclick = async () => {
                 previewModal.classList.remove('show');
-                console.log('Atletas a importar:', parsedAthletes);
-                console.log('Tests a importar:', parsedTests);
-                alert('Próximamente: importar estos datos a Supabase');
+                
+                // Mostrar loading
+                const loadingMsg = document.createElement('div');
+                loadingMsg.innerHTML = '<h2 style="color: #17a2b8;">Importando datos...</h2>';
+                loadingMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #222; padding: 30px; border-radius: 10px; z-index: 9999;';
+                document.body.appendChild(loadingMsg);
+                
+                // Borrar todos los datos
+                const deleted = await deleteAllUserData();
+                if (!deleted) {
+                    alert('Error al borrar datos actuales');
+                    document.body.removeChild(loadingMsg);
+                    return;
+                }
+                
+                // TODO: Importar datos nuevos
+                console.log('Datos borrados! Ahora falta importar:', parsedAthletes, parsedTests);
+                
+                document.body.removeChild(loadingMsg);
+                alert('Datos borrados exitosamente! (falta implementar la importación)');
             };
             
         } catch (error) {
