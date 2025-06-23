@@ -2664,19 +2664,72 @@ const addDivision = async (club, divisionName) => {
             // Leer datos de ATHLETES
             const athletesResponse = await gapi.client.sheets.spreadsheets.values.get({
                 spreadsheetId: spreadsheetId,
-                range: 'ATHLETES!A:C'
+                range: 'Athletes!A:C'
             });
             
             // Leer datos de TESTS
             const testsResponse = await gapi.client.sheets.spreadsheets.values.get({
                 spreadsheetId: spreadsheetId,
-                range: 'TESTS!A:G'
+                range: 'Tests!A:G'
             });
             
-            console.log('Athletes data:', athletesResponse.result);
-            console.log('Tests data:', testsResponse.result);
+            // Parsear datos
+            const athletesData = athletesResponse.result.values || [];
+            const testsData = testsResponse.result.values || [];
             
-            alert('Datos leídos! Check console para ver los datos.');
+            // Validar que hay datos
+            if (athletesData.length < 2) {
+                alert('La hoja Athletes está vacía o no tiene el formato correcto');
+                return;
+            }
+            
+            if (testsData.length < 2) {
+                alert('La hoja Tests está vacía o no tiene el formato correcto');
+                return;
+            }
+            
+            // Parsear athletes (ignorar header)
+            const parsedAthletes = [];
+            for (let i = 1; i < athletesData.length; i++) {
+                const row = athletesData[i];
+                if (row[0] && row[1] && row[2]) {
+                    parsedAthletes.push({
+                        club: row[0].trim().toUpperCase(),
+                        division: row[1].trim().toUpperCase(),
+                        athlete: row[2].trim()
+                    });
+                }
+            }
+            
+            // Parsear tests (ignorar header)
+            const parsedTests = [];
+            for (let i = 1; i < testsData.length; i++) {
+                const row = testsData[i];
+                if (row[0] && row[1] && row[2]) {
+                    parsedTests.push({
+                        name: row[0].trim().toUpperCase(),
+                        times: parseInt(row[1]) || 1,
+                        repetitions: parseInt(row[2]) || 1,
+                        recovery: parseInt(row[3]) || 0,
+                        deadTime: parseInt(row[4]) || 2,
+                        distances: row[5] || 'N/A',
+                        description: row[6] || ''
+                    });
+                }
+            }
+            
+            // Mostrar preview
+            let message = `📊 PREVIEW DE IMPORTACIÓN\n\n`;
+            message += `✅ ${parsedAthletes.length} atletas encontrados\n`;
+            message += `✅ ${parsedTests.length} tests encontrados\n\n`;
+            message += `⚠️ ATENCIÓN: Esto va a BORRAR TODOS los datos actuales\n\n`;
+            message += `¿Querés continuar con la importación?`;
+            
+            if (confirm(message)) {
+                console.log('Atletas a importar:', parsedAthletes);
+                console.log('Tests a importar:', parsedTests);
+                alert('Próximamente: importar estos datos a Supabase');
+            }
             
         } catch (error) {
             console.error('Error:', error);
