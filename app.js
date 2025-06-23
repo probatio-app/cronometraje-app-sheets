@@ -2953,11 +2953,21 @@ const addDivision = async (club, divisionName) => {
                     return;
                 }
                 
-                // TODO: Importar datos nuevos
-                console.log('Datos borrados! Ahora falta importar:', parsedAthletes, parsedTests);
-                
+                // Importar datos nuevos
+                const imported = await importParsedData(parsedAthletes, parsedTests);
+
                 document.body.removeChild(loadingMsg);
-                alert('Datos borrados exitosamente! (falta implementar la importación)');
+
+                if (imported) {
+                    // Actualizar interfaces
+                    updateTestSelect();
+                    updateClubsDropdown();
+                    updateChronoClubs();
+                    
+                    alert(`✅ Importación exitosa!\n\n${parsedAthletes.length} atletas y ${parsedTests.length} tests importados.`);
+                } else {
+                    alert('❌ Error durante la importación. Algunos datos pueden no haberse importado correctamente.');
+                }
             };
             
         } catch (error) {
