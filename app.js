@@ -2703,6 +2703,116 @@ const addDivision = async (club, divisionName) => {
         }
     }
 
+
+    // Función para importar datos parseados a Supabase
+    async function importParsedData(parsedAthletes, parsedTests) {
+        try {
+            // 1. Importar tests primero
+            for (const test of parsedTests) {
+                const { error } = await supabase
+                    .from('tests')
+                    .insert([{
+                        name: test.name,
+                        times: test.times,
+                        repetitions: test.repetitions,
+                        recovery: test.recovery,
+                        distances: test.distances,
+                        description: test.description,
+                        dead_time: test.deadTime,
+                        user_id: currentUser.id
+                    }]);
+                
+                if (error) {
+                    console.error('Error importando test:', test.name, error);
+                } else {
+                    // Actualizar testConfig local
+                    testConfig[test.name] = {
+                        times: test.times,
+                        repetitions: test.repetitions,
+                        recovery: test.recovery,
+                        distances: test.distances,
+                        description: test.description,
+                        deadTime: test.deadTime
+                    };
+                }
+            }
+            console.log('Tests importados:', Object.keys(testConfig).length);
+            
+            // 2. Crear estructura de clubs y divisions
+            const clubsToCreate = new Set();
+            const divisionsToCreate = new Set();
+            
+            parsedAthletes.forEach(a => {
+                clubsToCreate.add(a.club);
+                divisionsToCreate.add(`${a.club}|${a.division}`);
+            });
+            
+            // 3. Crear clubs
+            for (const clubName of clubsToCreate) {
+                const { error } = await supabase
+                    .from('clubs')
+                    .insert([{
+                        name: clubName,
+                        user_id: currentUser.id
+                    }]);
+                
+                if (error) {
+                    console.error('Error creando club:', clubName, error);
+                } else {
+                    data[clubName] = {};
+                }
+            }
+            console.log('Clubs creados:', clubsToCreate.size);
+            
+            // 4. Crear divisions
+            for (const divisionKey of divisionsToCreate) {
+                const [clubName, divisionName] = divisionKey.split('|');
+                
+                const { error } = await supabase
+                    .from('divisions')
+                    .insert([{
+                        name: divisionName,
+                        club_name: clubName,
+                        user_id: currentUser.id
+                    }]);
+                
+                if (error) {
+                    console.error('Error creando division:', divisionName, error);
+                } else {
+                    if (!data[clubName]) data[clubName] = {};
+                    data[clubName][divisionName] = [];
+                }
+            }
+            console.log('Divisions creadas:', divisionsToCreate.size);
+            
+            // 5. Crear athletes
+            for (const athlete of parsedAthletes) {
+                const { error } = await supabase
+                    .from('athletes')
+                    .insert([{
+                        name: athlete.athlete,
+                        club_name: athlete.club,
+                        division_name: athlete.division,
+                        user_id: currentUser.id
+                    }]);
+                
+                if (error) {
+                    console.error('Error creando athlete:', athlete.athlete, error);
+                } else {
+                    if (!data[athlete.club]) data[athlete.club] = {};
+                    if (!data[athlete.club][athlete.division]) data[athlete.club][athlete.division] = [];
+                    data[athlete.club][athlete.division].push(athlete.athlete);
+                }
+            }
+            console.log('Athletes creados:', parsedAthletes.length);
+            
+            return true;
+        } catch (error) {
+            console.error('Error general importando:', error);
+            return false;
+        }
+    }
+
     // Función para importar desde Google Sheets
     async function importFromGoogleSheets(sheetId) {
         try {
