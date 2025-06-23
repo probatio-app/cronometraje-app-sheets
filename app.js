@@ -2681,7 +2681,7 @@ const addDivision = async (club, divisionName) => {
         } catch (error) {
             console.error('Error:', error);
             if (error.status === 400) {
-                alert('Error: Verificá que el Sheet tenga hojas llamadas "ATHLETES" y "TESTS"');
+                alert('Error: Verificá que el Sheet tenga hojas llamadas "Athletes" y "Tests"');
             } else {
                 alert('Error: No se pudo acceder al Sheet. Verificá que sea público.');
             }
