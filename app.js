@@ -2661,17 +2661,30 @@ const addDivision = async (club, divisionName) => {
                 return;
             }
             
-            // Intentar obtener el sheet
-            const response = await gapi.client.sheets.spreadsheets.get({
-                spreadsheetId: spreadsheetId
+            // Leer datos de ATHLETES
+            const athletesResponse = await gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId: spreadsheetId,
+                range: 'ATHLETES!A:C'
             });
             
-            console.log('Sheet info:', response.result);
-            alert('Sheet encontrado: ' + response.result.properties.title);
+            // Leer datos de TESTS
+            const testsResponse = await gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId: spreadsheetId,
+                range: 'TESTS!A:G'
+            });
+            
+            console.log('Athletes data:', athletesResponse.result);
+            console.log('Tests data:', testsResponse.result);
+            
+            alert('Datos leídos! Check console para ver los datos.');
             
         } catch (error) {
             console.error('Error:', error);
-            alert('Error: No se pudo acceder al Sheet. Verificá que sea público.');
+            if (error.status === 400) {
+                alert('Error: Verificá que el Sheet tenga hojas llamadas "ATHLETES" y "TESTS"');
+            } else {
+                alert('Error: No se pudo acceder al Sheet. Verificá que sea público.');
+            }
         }
     }
 
