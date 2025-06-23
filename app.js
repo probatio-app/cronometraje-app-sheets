@@ -2900,8 +2900,14 @@ const addDivision = async (club, divisionName) => {
             const previewContent = document.getElementById('import-preview-content');
 
             let previewHTML = '<div style="padding: 20px;">';
+
+            // Advertencia PRIMERO
+            previewHTML += '<div style="margin-bottom: 20px; padding: 15px; background: #ff6b6b22; border: 1px solid #ff6b6b; border-radius: 5px;">';
+            previewHTML += '<strong style="color: #ff6b6b;">⚠️ WARNING:</strong><br>';
+            previewHTML += 'This will DELETE ALL current clubs, divisions, athletes and tests.';
+            previewHTML += '</div>';
+
             previewHTML += `<h4 style="color: #4ecdc4;">📁 Atletas encontrados: ${parsedAthletes.length}</h4>`;
-            previewHTML += '<div style="max-height: 200px; overflow-y: auto; background: #333; padding: 10px; border-radius: 5px; margin-bottom: 20px;">';
 
             // Agrupar por club y división
             const grouped = {};
@@ -2926,13 +2932,7 @@ const addDivision = async (club, divisionName) => {
             parsedTests.forEach(t => {
                 previewHTML += `<div style="margin-bottom: 5px; color: #ccc;">• ${t.name} (${t.times}x${t.repetitions}, rec: ${t.recovery}s)</div>`;
             });
-            previewHTML += '</div>';
-
-            previewHTML += '<div style="margin-top: 20px; padding: 15px; background: #ff6b6b22; border: 1px solid #ff6b6b; border-radius: 5px;">';
-            previewHTML += '<strong style="color: #ff6b6b;">⚠️ ATENCIÓN:</strong><br>';
-            previewHTML += 'Esto va a BORRAR TODOS los clubs, divisiones, atletas y tests actuales.';
-            previewHTML += '</div>';
-
+            previewHTML += '</div>';                        
             previewHTML += '</div>';
 
             previewContent.innerHTML = previewHTML;
