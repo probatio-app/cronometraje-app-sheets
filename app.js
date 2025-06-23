@@ -2639,6 +2639,42 @@ const addDivision = async (club, divisionName) => {
         }
     };
     
+    // Función para borrar TODOS los datos del usuario
+    async function deleteAllUserData() {
+        try {
+            // Borrar en orden inverso de dependencias
+            // 1. Borrar todos los athletes
+            await supabase
+                .from('athletes')
+                .delete()
+                .eq('user_id', currentUser.id);
+                
+            // 2. Borrar todas las divisions
+            await supabase
+                .from('divisions')
+                .delete()
+                .eq('user_id', currentUser.id);
+                
+            // 3. Borrar todos los clubs
+            await supabase
+                .from('clubs')
+                .delete()
+                .eq('user_id', currentUser.id);
+                
+            // 4. Borrar todos los tests
+            await supabase
+                .from('tests')
+                .delete()
+                .eq('user_id', currentUser.id);
+                
+            console.log('Todos los datos borrados exitosamente');
+            return true;
+        } catch (error) {
+            console.error('Error borrando datos:', error);
+            return false;
+        }
+    }
+
     // Función para importar desde Google Sheets
     async function importFromGoogleSheets(sheetId) {
         try {
