@@ -2642,35 +2642,46 @@ const addDivision = async (club, divisionName) => {
     // Función para borrar TODOS los datos del usuario
     async function deleteAllUserData() {
         try {
+            console.log('Iniciando borrado de datos...');
+            console.log('Usuario actual:', currentUser.id);
+            
             // Borrar en orden inverso de dependencias
             // 1. Borrar todos los athletes
-            await supabase
+            const { error: errorAthletes } = await supabase
                 .from('athletes')
                 .delete()
                 .eq('user_id', currentUser.id);
+            if (errorAthletes) console.error('Error borrando athletes:', errorAthletes);
+            else console.log('Athletes borrados');
                 
             // 2. Borrar todas las divisions
-            await supabase
+            const { error: errorDivisions } = await supabase
                 .from('divisions')
                 .delete()
                 .eq('user_id', currentUser.id);
+            if (errorDivisions) console.error('Error borrando divisions:', errorDivisions);
+            else console.log('Divisions borradas');
                 
             // 3. Borrar todos los clubs
-            await supabase
+            const { error: errorClubs } = await supabase
                 .from('clubs')
                 .delete()
                 .eq('user_id', currentUser.id);
+            if (errorClubs) console.error('Error borrando clubs:', errorClubs);
+            else console.log('Clubs borrados');
                 
             // 4. Borrar todos los tests
-            await supabase
+            const { error: errorTests } = await supabase
                 .from('tests')
                 .delete()
                 .eq('user_id', currentUser.id);
+            if (errorTests) console.error('Error borrando tests:', errorTests);
+            else console.log('Tests borrados');
                 
             console.log('Todos los datos borrados exitosamente');
             return true;
         } catch (error) {
-            console.error('Error borrando datos:', error);
+            console.error('Error general borrando datos:', error);
             return false;
         }
     }
