@@ -449,6 +449,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         )).then(() => {
                             updateClubsDropdown();
                             updateChronoClubs();
+                            // Re-setup athletes page para que funcionen los event listeners
+                            if (document.getElementById('page-athletes')) {
+                                setupAthletesPage();
+                            }
                         });
                     });
                 });
