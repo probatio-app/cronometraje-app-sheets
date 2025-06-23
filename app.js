@@ -2679,6 +2679,23 @@ const addDivision = async (club, divisionName) => {
             else console.log('Tests borrados');
                 
             console.log('Todos los datos borrados exitosamente');
+            // Limpiar datos locales
+            data = {};
+            testConfig = {};
+            testStates = {};
+            savedResults = [];
+
+            // Limpiar dropdowns si estamos en la página
+            if (document.getElementById('club-select')) {
+                document.getElementById('club-select').innerHTML = '<option value="">-- Choose --</option>';
+                document.getElementById('division-select').innerHTML = '<option value="">-- Choose --</option>';
+                document.getElementById('athlete-select').innerHTML = '<option value="">-- Choose --</option>';
+            }
+            if (document.getElementById('test-select')) {
+                document.getElementById('test-select').innerHTML = '<option value="">-- Choose --</option>';
+            }
+
+            console.log('Datos locales limpiados');
             return true;
         } catch (error) {
             console.error('Error general borrando datos:', error);
