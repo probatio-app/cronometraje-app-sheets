@@ -2638,6 +2638,29 @@ const addDivision = async (club, divisionName) => {
             updateStartButton();
         }
     };
+    
+    // Función para importar desde Google Sheets
+    async function importFromGoogleSheets(sheetId) {
+        try {
+            // Verificar que gapi esté listo
+            if (!window.gapiInited) {
+                alert('Google API no está lista. Intentá de nuevo en unos segundos.');
+                return;
+            }
+            
+            // Intentar obtener el sheet
+            const response = await gapi.client.sheets.spreadsheets.get({
+                spreadsheetId: sheetId
+            });
+            
+            console.log('Sheet info:', response.result);
+            alert('Sheet encontrado: ' + response.result.properties.title);
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error: No se pudo acceder al Sheet. Verificá que sea público.');
+        }
+    }
 
     const setupAthletesPage = () => {
         const athletesClubSelect = document.getElementById('athletes-club-select');
@@ -2871,10 +2894,8 @@ const addDivision = async (club, divisionName) => {
             if (!sheetId) {
                 alert('Por favor, pegá el ID del Google Sheet');
                 return;
-            }
-            
-            console.log('Import clicked! Sheet ID:', sheetId);
-            alert('Sheet ID: ' + sheetId);
+            }            
+            importFromGoogleSheets(sheetId);
         });
     }
     };
