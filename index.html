@@ -394,6 +394,25 @@
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
 
     <script src="app.js" defer></script>
+
+<!-- Modal de Preview de Importación -->
+<div id="import-preview-modal" class="modal">
+    <div class="modal-content wide">
+        <div class="modal-header">
+            <h3 class="modal-title" style="color: #17a2b8">📊 Preview de Importación</h3>
+            <button class="close-btn" onclick="document.getElementById('import-preview-modal').classList.remove('show')">×</button>
+        </div>
+        
+        <div id="import-preview-content" style="max-height: 400px; overflow-y: auto;">
+            <!-- El contenido se genera dinámicamente -->
+        </div>
+        
+        <div class="modal-buttons" style="margin-top: 20px;">
+            <button class="modal-btn cancel" onclick="document.getElementById('import-preview-modal').classList.remove('show')">CANCELAR</button>
+            <button id="confirm-import-btn" class="modal-btn" style="background: #17a2b8">IMPORTAR TODO</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
 

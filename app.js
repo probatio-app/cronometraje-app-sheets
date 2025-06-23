@@ -2719,17 +2719,55 @@ const addDivision = async (club, divisionName) => {
             }
             
             // Mostrar preview
-            let message = `📊 PREVIEW DE IMPORTACIÓN\n\n`;
-            message += `✅ ${parsedAthletes.length} atletas encontrados\n`;
-            message += `✅ ${parsedTests.length} tests encontrados\n\n`;
-            message += `⚠️ ATENCIÓN: Esto va a BORRAR TODOS los datos actuales\n\n`;
-            message += `¿Querés continuar con la importación?`;
-            
-            if (confirm(message)) {
+            const previewModal = document.getElementById('import-preview-modal');
+            const previewContent = document.getElementById('import-preview-content');
+
+            let previewHTML = '<div style="padding: 20px;">';
+            previewHTML += `<h4 style="color: #4ecdc4;">📁 Atletas encontrados: ${parsedAthletes.length}</h4>`;
+            previewHTML += '<div style="max-height: 200px; overflow-y: auto; background: #333; padding: 10px; border-radius: 5px; margin-bottom: 20px;">';
+
+            // Agrupar por club y división
+            const grouped = {};
+            parsedAthletes.forEach(a => {
+                if (!grouped[a.club]) grouped[a.club] = {};
+                if (!grouped[a.club][a.division]) grouped[a.club][a.division] = [];
+                grouped[a.club][a.division].push(a.athlete);
+            });
+
+            for (const club in grouped) {
+                previewHTML += `<div style="margin-bottom: 10px;"><strong style="color: #17a2b8;">${club}</strong>`;
+                for (const division in grouped[club]) {
+                    previewHTML += `<div style="margin-left: 20px; color: #ccc;">▸ ${division}: ${grouped[club][division].join(', ')}</div>`;
+                }
+                previewHTML += '</div>';
+            }
+
+            previewHTML += '</div>';
+
+            previewHTML += `<h4 style="color: #4ecdc4;">🏃 Tests encontrados: ${parsedTests.length}</h4>`;
+            previewHTML += '<div style="background: #333; padding: 10px; border-radius: 5px;">';
+            parsedTests.forEach(t => {
+                previewHTML += `<div style="margin-bottom: 5px; color: #ccc;">• ${t.name} (${t.times}x${t.repetitions}, rec: ${t.recovery}s)</div>`;
+            });
+            previewHTML += '</div>';
+
+            previewHTML += '<div style="margin-top: 20px; padding: 15px; background: #ff6b6b22; border: 1px solid #ff6b6b; border-radius: 5px;">';
+            previewHTML += '<strong style="color: #ff6b6b;">⚠️ ATENCIÓN:</strong><br>';
+            previewHTML += 'Esto va a BORRAR TODOS los clubs, divisiones, atletas y tests actuales.';
+            previewHTML += '</div>';
+
+            previewHTML += '</div>';
+
+            previewContent.innerHTML = previewHTML;
+            previewModal.classList.add('show');
+
+            // Setup botón confirmar
+            document.getElementById('confirm-import-btn').onclick = () => {
+                previewModal.classList.remove('show');
                 console.log('Atletas a importar:', parsedAthletes);
                 console.log('Tests a importar:', parsedTests);
                 alert('Próximamente: importar estos datos a Supabase');
-            }
+            };
             
         } catch (error) {
             console.error('Error:', error);
