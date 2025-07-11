@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROBATIO</title>
+    <link rel="stylesheet" href="style.css?v=58.39">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <script type="module">
+        import { createClient } from "https://esm.sh/@supabase/supabase-js"
+        window.supabase = { createClient }
+    </script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    
+    <!-- NUEVO SCRIPT PARA GOOGLE APIS -->
+    <script>
+        // Funciones de inicialización de Google
+        function gapiLoaded() {
+            if (typeof gapi !== 'undefined') {
+                gapi.load('client', initializeGapiClient);
+            } else {
+                console.log('Esperando a que gapi esté disponible...');
+                setTimeout(gapiLoaded, 100);
+            }
+        }
+        
+        async function initializeGapiClient() {
+            try {
+                await gapi.client.init({
+                    apiKey: 'AIzaSyDNoMo2XoJoeKdR7NDgdYPkKkXY_2ktWc8',
+                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+                });
+                window.gapiInited = true;
+                console.log('Google API Client inicializado');
+            } catch (error) {
+                console.error('Error inicializando GAPI:', error);
+            }
+        }
+        
+        function gisLoaded() {
+            if (typeof google !== 'undefined') {
+                window.tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: '1066924466838-atmhd1c2lnvvsduojqp5h5n3jahlt0gk.apps.googleusercontent.com',
+                    scope: 'https://www.googleapis.com/auth/spreadsheets',
+                    callback: '', // Se define más tarde
+                });
+                window.gisInited = true;
+                console.log('Google Identity Services inicializado');
+            } else {
+                console.log('Esperando a que google esté disponible...');
+                setTimeout(gisLoaded, 100);
+            }
+        }
+        
+        // Variables globales
+        window.gapiInited = false;
+        window.gisInited = false;
+        window.tokenClient = null;
+        window.accessToken = null;
+    </script>
+</head>
+<body>
+<!-- Usuario y Logo -->
+<div id="user-info" class="user-info hidden">
+    <div class="header-left">
+        <img src="logo-probatio.png" class="app-logo" alt="PROBATIO">
+        <span class="version-top">v58.39</span>
+    </div>
+    <div class="header-center">
+        <button id="bug-report-btn" class="bug-report-btn">BUG REPORT</button>
+    </div>
+    <div class="header-right">
+        <div class="user-section" id="user-logout-area">
+            <img id="user-avatar" class="user-avatar" src="" alt="Avatar">
+            <span id="user-name" class="user-name"></span>
+        </div>
+    </div>
+</div>
+
+    <!-- Pantalla de Login -->
+<div id="login-screen" class="login-screen">
+    <div class="login-container">
+        <div class="logo-container">
+            <img src="logo-probatio.png" class="login-logo" alt="PROBATIO">
+        </div>
+        <p>Sign in with your Google account to get started</p>
+        <button id="login-btn" class="login-btn">SIGN IN WITH GOOGLE</button>
+    </div>
+</div>
+
+    <div id="page-chrono" class="page active-page">
+        <div class="container">
+            <!-- NUEVA SECCIÓN DE SELECCIÓN SIMPLIFICADA -->
+            <div class="selection-section" id="selection-section">
+                <div class="selection-controls">
+                    <div class="control-group">
+                        <label class="control-label">CLUB</label>
+                        <button id="club-modal-btn" class="selection-btn">
+                            <span id="selected-club-text">--</span>
+                        </button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">DIVISION</label>
+                        <button id="division-modal-btn" class="selection-btn" disabled>
+                            <span id="selected-division-text">--</span>
+                        </button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">TEST</label>
+                        <button id="test-modal-btn" class="selection-btn">
+                            <span id="selected-test-text">--</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- ELEMENTOS OCULTOS -->
+                <select id="club-select" style="display: none;">
+                    <option value="">-- Choose --</option>
+                </select>
+                <select id="division-select" style="display: none;">
+                    <option value="">-- Choose --</option>
+                </select>
+                <select id="test-select" style="display: none;">
+                    <option value="">-- Choose --</option>
+                </select>
+                <select id="athlete-select" disabled style="display: none;">
+                    <option value="">-- Choose --</option>
+                </select>
+                <button id="athletes-btn" style="display: none;">ATHLETES</button>
+            </div>
+
+            <!-- ESPACIO FIJO PARA TEST CONFIG -->
+            <div id="test-config-space" class="test-config-space">
+                <div id="test-config" class="test-config">                   
+                    <div class="config-grid">
+                        <div class="config-item">
+                            <div class="config-label">TIMES</div>
+                            <div class="config-value" id="config-times">-</div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-label">REP.</div>
+                            <div class="config-value" id="config-repetitions">-</div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-label">RECOV.</div>
+                            <div class="config-value" id="config-recovery">- sec</div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-label">DEAD TIME</div>
+                            <div class="config-value" id="config-dead-time">- sec</div>
+                        </div>
+                    </div>
+                </div>
+            </div>                 
+            <div class="main-buttons-group">
+                <button id="start-btn" class="main-btn start-btn" disabled>START</button>
+                <button id="reset-btn" class="main-btn reset-btn">RESET</button>
+                <button id="save-btn" class="main-btn save-btn">FINISH TEST</button>
+            </div>
+            
+            <div class="time-counter" id="time-counter">-/-</div>   
+                   <div class="chrono-container">
+                        <div class="chrono-top-row">
+                            <button id="athletes-btn-cronometro" class="athletes-btn-cronometro">ATHLETES</button>
+                            <h1 id="chrono" class="chrono">00.000</h1>
+                        </div>
+                        
+                        <div style="display: flex; gap: 5px;">
+                            <div class="rep-column">
+                                <div class="rep-section">
+                                    <h3>REP.</h3>
+                                    <div id="rep-counter" class="rep-counter">(1/1)</div>
+                                </div>
+                                <div class="cell-section">
+                                    <h3>CELL</h3>
+                                    <div id="chrono-semaforo" style="width: 56px; height: 56px; border-radius: 50%; background: #222; border: 2px solid #444; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: bold; color: #ccc;">
+                                        <span id="semaforo-text"></span>
+                                    </div>
+                                </div>
+                                <div class="tested-section">
+                                    <button id="tested-btn" class="tested-btn" disabled>PREVIEW</button>
+                                </div>
+                            </div>
+                            
+                            <div class="times-column">
+                                <h3>SPLIT</h3>
+                                <div id="split-1" class="time-value">--</div>
+                                <div id="split-2" class="time-value">--</div>
+                                <div id="split-3" class="time-value">--</div>
+                                <div id="split-4" class="time-value">--</div>
+                                <div id="split-5" class="time-value">--</div>
+                                <div id="split-6" class="time-value">--</div>
+                            </div>
+                            
+                            <div class="times-column">
+                                <h3>LAP</h3>
+                                <div id="lap-1" class="time-value">--</div>
+                                <div id="lap-2" class="time-value">--</div>
+                                <div id="lap-3" class="time-value">--</div>
+                                <div id="lap-4" class="time-value">--</div>
+                                <div id="lap-5" class="time-value">--</div>
+                                <div id="lap-6" class="time-value">--</div>
+                            </div>
+                        </div>
+                    </div>
+        </div>
+    </div>
+
+    <!-- Página de atletas -->
+    <div id="page-athletes" class="page">
+        <div class="container">
+            <h1 style="text-align: center; color: #0ff; margin-bottom: 30px;">ATHLETES MANAGEMENT</h1>
+            
+            <!-- Navegación de estructura -->
+            <div class="athletes-navigation">
+                <div class="nav-section">
+                    <label for="athletes-club-select">Club</label>
+                    <select id="athletes-club-select">
+                        <option value="">-- Select Club --</option>
+                    </select>
+                    <button id="delete-club-btn" class="delete-section-btn" disabled>DELETE CLUB</button>
+                </div>
+                
+                <div class="nav-section">
+                    <label for="athletes-division-select">Division</label>
+                    <select id="athletes-division-select" disabled>
+                        <option value="">-- Select Division --</option>
+                    </select>
+                    <button id="delete-division-btn" class="delete-section-btn" disabled>DELETE DIVISION</button>
+                </div>
+            </div>
+
+            <!-- Formulario para agregar club -->
+            <div class="management-section">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Add New Club</h3>
+                <div class="add-form">
+                    <div class="form-row-inline">
+                        <input type="text" id="new-club-name" placeholder="Club name" maxlength="30">
+                        <button id="add-club-btn" class="add-btn">ADD CLUB</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario para agregar división -->
+            <div class="management-section">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Add New Division</h3>
+                <div class="add-form">
+                    <div class="form-row-inline">
+                        <input type="text" id="new-division-name" placeholder="Division name" maxlength="30">
+                        <button id="add-division-btn" class="add-btn" disabled>ADD DIVISION</button>
+                    </div>
+                    <div class="form-hint">Select a club first to add divisions</div>
+                </div>
+            </div>
+
+            <!-- Formulario para agregar atleta -->
+            <div class="management-section">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Add New Athlete</h3>
+                <div class="add-form">
+                    <div class="form-row-inline">
+                        <input type="text" id="new-athlete-name" placeholder="Athlete alias/ID" maxlength="30">
+                        <button id="add-athlete-btn" class="add-btn" disabled>ADD ATHLETE</button>
+                    </div>
+                    <div class="form-hint">Select club and division first. Use numbers or nicknames, not real names</div>
+                </div>
+            </div>
+            <!-- Importar desde Google Sheets -->
+            <div class="management-section">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Import from Google Sheets</h3>
+                <div class="import-form">
+                    <div class="form-row">
+                        <input type="text" id="sheet-id" placeholder="Paste Google Sheet URL or ID" maxlength="100" style="width: 100%;">
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button id="import-sheet-btn" class="add-btn" style="width: 100%;">IMPORT</button>
+                    </div>
+                    <div class="form-hint">Make sure your sheet is public. Use aliases/IDs instead of real names</div>
+                </div>
+            </div>
+            <!-- Exportar datos -->
+            <div class="management-section">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Export All Data</h3>
+                <div class="export-form">
+                    <button id="export-data-btn" class="add-btn" style="width: 100%; background: #17a2b8;">EXPORT DATA</button>
+                    <div class="form-hint">Export all clubs, divisions, athletes and tests to Excel file</div>
+                </div>
+            </div>
+            <!-- Lista de atletas actuales -->
+            <div id="athletes-list-section" class="athletes-list-section" style="display: none;">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Athletes in <span id="current-selection">--</span></h3>
+                <div id="athletes-list" class="athletes-list">
+                    <!-- Atletas se muestran aquí dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Página de tests -->
+    <div id="page-tests" class="page">
+        <div class="container">
+            <h1 style="text-align: center; color: #0ff; margin-bottom: 30px;">TESTS MANAGEMENT</h1> 
+            <!-- Formulario para agregar test -->
+            <div class="test-form-section">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Add New Test</h3>
+                <div class="test-form">
+                    <div class="form-row">
+                        <label for="new-test-name">Test Name</label>
+                        <input type="text" id="new-test-name" placeholder="Enter test name" maxlength="20">
+                    </div>
+                    
+                    <div class="form-row">
+                        <label for="new-test-times">Times (1-6)</label>
+                        <input type="number" id="new-test-times" min="1" max="6" placeholder="1">
+                    </div>
+                    
+                    <div class="form-row">
+                        <label for="new-test-repetitions">Repetitions</label>
+                        <input type="number" id="new-test-repetitions" min="1" max="10" placeholder="1">
+                    </div>
+                    
+                    <div class="form-row">
+                        <label for="new-test-recovery">Recovery (seconds)</label>
+                        <input type="number" id="new-test-recovery" min="0" max="300" placeholder="0">
+                    </div>
+                    
+                    <div class="form-row">
+                        <label for="new-test-dead-time">Dead Time (seconds)</label>
+                        <select id="new-test-dead-time">
+                            <option value="1">1 second</option>
+                            <option value="2" selected>2 seconds</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="new-test-distances">Distances (meters) - Optional</label>
+                        <input type="text" id="new-test-distances" placeholder="e.g. 35 or 10-20-30">
+                    </div>
+                    
+                    <div class="form-row">
+                        <label for="new-test-description">Description - Optional</label>
+                        <textarea id="new-test-description" placeholder="Enter test description, instructions, or notes..." maxlength="500" rows="3"></textarea>
+                    </div>
+                    
+                    <button id="add-test-btn" class="add-test-btn">ADD TEST</button>
+                </div>
+            </div>
+            <!-- Sección informativa de Export -->
+            <div class="management-section" style="margin-top: 30px;">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Import/Export Tests</h3>
+                <div style="background: #333; padding: 20px; border-radius: 5px; text-align: center;">
+                    <p style="color: #ccc; font-size: 14px; margin: 0;">
+                         To import/export all your data (including tests), go to the <strong style="color: #17a2b8;">ATHLETES</strong> tab and use the <strong>IMPORT</strong> or <strong>EXPORT DATA</strong> buttons.
+                    </p>
+                </div>
+            </div>
+            <!-- Lista de tests existentes -->
+            <div class="tests-list-section">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">Existing Tests</h3>
+                <div class="tests-list">
+                    <div class="test-item">
+                        <div class="test-info">
+                          
+                        </div>
+                      
+                    </div>                    
+                   
+                </div>
+            </div>            
+        </div>
+    </div>
+
+   <!-- Página de photocells -->
+    <div id="page-photocells" class="page">
+        <div class="container">           
+            <h1 style="text-align: center; color: #0ff; margin-bottom: 30px;">PHOTOCELLS CONTROL</h1>            
+            <!-- Sección de conexión BLE -->
+            <div class="ble-connection-section">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">📡 Bluetooth Connection</h3>
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <button id="connect-ble-btn" class="connect-ble-btn">ADD DEVICE</button>
+                    <button id="connect-all-btn" class="connect-all-btn" style="display: none;">CONNECT ALL</button>
+                </div>
+                <div class="form-hint" style="text-align: center;">Select one device at a time from the list</div>
+            </div>
+            
+            <!-- Sección de dispositivos -->
+            <div class="ble-devices-section">
+                <h3 style="color: #4ecdc4; margin-bottom: 15px;">🔦 Connected Devices</h3>
+                <div class="devices-grid" id="devices-grid">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Página de results -->
+    <div id="page-results" class="page">
+        <div class="container">
+            <h1 style="text-align: center; color: #0ff; margin-bottom: 30px;">TEST RESULTS</h1>
+            <div class="results-controls">
+                <div class="results-buttons">
+                    <button id="share-all-btn" class="share-all-btn">EXPORT ALL</button>      
+                    <button id="delete-all-btn" class="delete-all-btn">DELETE ALL</button>          
+                </div>
+                <div class="export-format-section">
+                    <label class="format-label">Export Format:</label>
+                    <div class="format-options">
+                        <label class="radio-option">
+                            <input type="radio" name="export-format" value="seconds" checked>
+                            <span>123.456s</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="export-format" value="milliseconds">
+                            <span>123456ms</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div id="results-list" class="results-list">
+                <!-- Los resultados se van a mostrar acá dinámicamente -->
+            </div>
+        </div>
+    </div>
+    <div id="reset-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title reset">Confirm RESET</h3>
+            <p id="reset-text">Are you sure you want to reset TEST for CLUB - DIVISION?</p>
+            <p style="color: #ff9999; font-size: 14px; margin-bottom: 30px;">
+                This will delete all results for the current test.
+            </p>
+            <div class="modal-buttons">
+                <button id="cancel-reset" class="modal-btn cancel">CANCEL</button>
+                <button id="confirm-reset" class="modal-btn confirm">YES, RESET</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="save-modal" class="modal">
+        <div class="modal-content">
+            <h3 class="modal-title save">Finish Test</h3>
+            <p id="save-text">There are still 0 athletes to be evaluated.</p>
+            <p style="color: #ffcc99; font-size: 14px; margin-bottom: 30px;">
+                Do you want to mark them as DNF (Did Not Finish) and finish the test?
+            </p>
+            <div class="modal-buttons">
+                <button id="cancel-save" class="modal-btn cancel">CANCEL</button>
+                <button id="confirm-save" class="modal-btn finish">YES, FINISH</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="results-modal" class="modal">
+        <div class="modal-content wide">
+            <div class="modal-header">
+                <h3 class="modal-title results" id="results-title">Results: TEST - CLUB - DIVISION</h3>
+                <button id="close-results-header" class="close-btn">×</button>
+            </div>
+            
+            <div class="results-table" id="results-table">
+            </div>
+            
+            <div class="test-footer" id="test-footer">
+            </div>
+            
+            <div style="text-align: center;">
+                <button id="close-results" class="modal-btn close">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar" id="navbar">
+    <!-- Botones se generan dinámicamente -->
+</nav>
+
+    <footer class="version"></footer> <!-- podria borrar esta linea pero prefiero dejarla vacia x si se "mueve algo" al borrarla -->
+
+    <!-- Google API Client Library -->
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+
+    <script src="app.js?v=58.39" defer></script>
+
+<!-- Modal de Preview de Importación -->
+<div id="import-preview-modal" class="modal">
+    <div class="modal-content wide">
+        <div class="modal-header">
+            <h3 class="modal-title" style="color: #17a2b8">📊 Import Preview</h3>
+            <div style="color: #ffa500; font-size: 14px; margin-bottom: 10px;">⚠️ Remember: Use aliases/IDs, not real names</div>
+            <button class="close-btn" onclick="document.getElementById('import-preview-modal').classList.remove('show')">×</button>
+        </div>
+        
+        <div id="import-preview-content" style="max-height: 400px; overflow-y: auto;">
+            <!-- El contenido se genera dinámicamente -->
+        </div>
+        
+        <div class="modal-buttons" style="margin-top: 20px;">
+           <button class="modal-btn cancel" onclick="document.getElementById('import-preview-modal').classList.remove('show')">CANCEL</button>
+           <button id="confirm-import-btn" class="modal-btn" style="background: #17a2b8">IMPORT ALL</button>
+
+        </div>
+    </div>
+</div>
+<!-- Modal de gestión de atletas -->
+<div id="athletes-management-modal" class="modal">
+    <div class="modal-content wide">
+        <div class="modal-header">
+            <h3 class="modal-title">Athletes Management</h3>
+            <button class="close-btn" id="close-athletes-modal">×</button>
+        </div>
+        
+        <div class="athletes-lists-container">
+            <div class="athletes-list-section">
+                <div class="list-header active">ACTIVE</div>
+                <div id="active-athletes-list" class="athletes-modal-list"></div>
+            </div>
+            
+            <div class="athletes-list-section">
+                <div class="list-header dns">DNS</div>
+                <div id="dns-athletes-list" class="athletes-modal-list"></div>
+            </div>
+        </div>
+        
+        <div class="ipod-controls">
+            <button class="ipod-btn up" id="ipod-up" disabled>↑</button>
+            <button class="ipod-btn left" id="ipod-left" disabled>←</button>
+            <button class="ipod-btn center" id="ipod-clear">CLEAR</button>
+            <button class="ipod-btn right" id="ipod-right" disabled>→</button>
+            <button class="ipod-btn down" id="ipod-down" disabled>↓</button>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="modal-btn cancel" id="cancel-athletes-modal">CANCEL</button>
+            <button class="modal-btn confirm" id="confirm-athletes-modal">CONFIRM</button>
+        </div>
+    </div>
+</div>
+<!-- Modal de selección de CLUB -->
+<div id="club-selection-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Select Club</h3>
+            <button class="close-btn" id="close-club-modal">×</button>
+        </div>
+        <div class="modal-list" id="club-modal-list">
+            <!-- Los clubs se cargan dinámicamente -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal de selección de DIVISION -->
+<div id="division-selection-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Select Division</h3>
+            <button class="close-btn" id="close-division-modal">×</button>
+        </div>
+        <div class="modal-list" id="division-modal-list">
+            <!-- Las divisions se cargan dinámicamente -->
+        </div>
+    </div>
+</div>
+<!-- Modal de selección de TEST -->
+<div id="test-selection-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Select Test</h3>
+            <button class="close-btn" id="close-test-modal">×</button>
+        </div>
+        <div class="modal-list" id="test-modal-list">
+            <!-- Los tests se cargan dinámicamente -->
+        </div>
+    </div>
+</div>
+</body>
+</html>
